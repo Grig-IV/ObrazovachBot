@@ -1,16 +1,24 @@
-from telebot import apihelper
+import json
 
-from obrazovac_bot import ObrazovachBot
+from telebot.TeleBot import apihelper
+
+from src.obrazovach_bot import ObrazovachBot
+
+
+json_file = open("ObrazovachBotConfig.json", 'r')
+bot_config = json.load(json_file)
+json_file.close()
+
+obrz_bot = ObrazovachBot(**bot_config)
 
 
 apihelper.ENABLE_MIDDLEWARE = True
-
-obrz_bot = ObrazovachBot(config_filename="ObrazovachBotSettings.json")
-
-
 @obrz_bot.tb.middleware_handler(update_types=['message', 'callback_query'])
 def middleware_handler(bot_instance, package):
-    pikcher = obrz_bot.registrar.get_or_create_pikcher(package)
+    if obrz_bot.is_development:
+        obrz_bot.logger.send_log(package)
+
+    pikcher = obrz_bot.pikchers.get_or_create_pikcher(package)
 
     obrz_bot.initializer.initialization_handler(pikcher, package)
 
