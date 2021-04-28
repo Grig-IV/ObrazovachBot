@@ -5,7 +5,7 @@ class PikchersRep:
         self.pikchers_names = pikchers_names
         self.pikchers = dict()
 
-    def get_or_create_pikcher(self, username):
+    def get_or_create_pikcher(self, json_package):
         username = json_package.from_user.username
         user_id = json_package.from_user.id
         
