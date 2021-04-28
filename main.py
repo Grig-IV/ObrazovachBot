@@ -1,22 +1,14 @@
-import json
-
-from telebot.TeleBot import apihelper
-
-from src.obrazovach_bot import ObrazovachBot
+import startup
+from src.logger import LoggerBot
 
 
-json_file = open("ObrazovachBotConfig.json", 'r')
-bot_config = json.load(json_file)
-json_file.close()
-
-obrz_bot = ObrazovachBot(**bot_config)
+obrz_bot = startup.build_obrz_bot()
 
 
-apihelper.ENABLE_MIDDLEWARE = True
-@obrz_bot.tb.middleware_handler(update_types=['message', 'callback_query'])
+@obrz_bot.tb.middleware_handler(update_types=['message'])
 def middleware_handler(bot_instance, package):
-    if obrz_bot.is_development:
-        obrz_bot.logger.send_log(package)
+    if LoggerBot.is_enabled:
+        LoggerBot.send_log(package)
 
     pikcher = obrz_bot.pikchers.get_or_create_pikcher(package)
 
@@ -27,6 +19,7 @@ def middleware_handler(bot_instance, package):
         package.pikcher = pikcher
     else:
         package.access_token = False
+
 
 @obrz_bot.tb.message_handler(content_types=['text'])
 def commands_handler(message):
@@ -72,4 +65,4 @@ def doc_for_init_handler(db_message):
     pass
 
 
-obrz_bot.tb.polling()
+obrz_bot.tb.polling(none_stop=True)
