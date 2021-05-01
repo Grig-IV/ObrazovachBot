@@ -3,7 +3,7 @@ import json
 from telebot import TeleBot
 from telebot import apihelper
 
-from src.logger import LoggerBot
+from src.Services.logger import Logger
 from src.obrazovach_bot import ObrazovachBot
 
 

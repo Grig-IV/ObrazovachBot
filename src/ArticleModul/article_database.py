@@ -1,0 +1,2 @@
+class ArticleDataBase:
+    pass

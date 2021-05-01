@@ -1,5 +1,6 @@
 import startup
 from src.logger import LoggerBot
+from src.message_manager import MessageManager
 
 
 obrz_bot = startup.build_obrz_bot()
@@ -12,9 +13,9 @@ def middleware_handler(bot_instance, package):
 
     pikcher = obrz_bot.pikchers.get_or_create_pikcher(package)
 
-    obrz_bot.initializer.initialization_handler(pikcher, package)
+    is_bot_initialized = obrz_bot.initialization_handler(pikcher, package)
 
-    if obrz_bot.is_initialized and pikcher:
+    if is_bot_initialized and pikcher is not None:
         package.access_token = True
         package.pikcher = pikcher
     else:
@@ -28,13 +29,15 @@ def commands_handler(message):
 
     parser = lambda t: (t.split()[0].strip(), t.split()[1:].strip())
     command, value = parser(message.text)
+    pikcher = message.pikcher
 
+    error = None
     if command in ['/беру', '/подумаю']:
-        pass
+        error = obrz_bot.article_manager.take_article(pikcher, value)
     elif command == '/на_опрос':
-        pass
+        error = obrz_bot.article_manager.take_poll(pikcher, value)
     elif command ==  '/не_беру':
-        pass
+        error = obrz_bot.article_manager.give_article_back(pikcher, value)
     elif command.startswith('/add_filter '):
         pass
     elif command.startswith('/remove_filter '):
@@ -43,6 +46,10 @@ def commands_handler(message):
         pass
     else:
         pass
+
+    if error is not None:
+        MessageManager.send_message(message.chat_id, error)
+
 
 @obrz_bot.tb.callback_query_handler(func=lambda call: True)
 def callback_handler(call):

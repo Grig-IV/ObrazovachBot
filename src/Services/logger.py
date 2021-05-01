@@ -1,6 +1,4 @@
-from telebot import TeleBot
-
-class LoggerBot:
+class Logger:
     _tb = None
     _admin_id = None
 
