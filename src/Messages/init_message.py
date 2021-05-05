@@ -1,4 +1,4 @@
-from src.viewe.message import Message
+from src.AbstractClasses.abstract_message import Message
 
 class InitMessage(Message):
     def __init__(self):
