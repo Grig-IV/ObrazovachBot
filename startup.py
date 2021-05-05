@@ -5,6 +5,7 @@ from telebot import apihelper
 
 from src.Services.logger import Logger
 from src.obrazovach_bot import ObrazovachBot
+from src.Services.telebot_provider import TelebotProvider
 
 
 apihelper.ENABLE_MIDDLEWARE = True
@@ -27,7 +28,8 @@ def build_obrz_bot():
         logger_token = launch_settings['test_bot_token']
         LoggerBot.enable(logger_token)
 
-    telebot = TeleBot(token)
+    telebot = TeleBot(token, parse_mode='HTML')
+    TelebotProvider.set_telebot(telebot)
     obrz_bot = ObrazovachBot(telebot, **bot_config)
 
     return obrz_bot
