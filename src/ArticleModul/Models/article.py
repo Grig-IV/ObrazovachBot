@@ -76,7 +76,7 @@ class _Article:
         return "https://nplus1.ru" + self._link
 
     @property
-    def kind(self):
+    def type(self):
         return self._kind
 
     @property
@@ -104,10 +104,6 @@ class _Article:
     @taken_by.setter
     def taken_by(self, pikcher_name):
         self._taken_by = pikcher_name
-
-    @taken_by.deleter
-    def taken_by(self):
-        self._taken_by = None
 
     def use_for_poll(self):
         self._use_for_poll = True
