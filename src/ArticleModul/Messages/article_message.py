@@ -6,7 +6,7 @@ from src.AbstractClasses.abstract_message import Message
 
 class ArticleMessage(Message):
     MAX_ARTICLES_ON_PAGE = 6
-    def _init_(self, pikcher, free_articles, last_update):
+    def __init__(self, pikcher, free_articles, last_update):
         curr_a_type = pikcher.data['currArticlesTypeShow']
         db_message_id = pikcher.data['databaseMessageId']
         rubric_filter = set(pikcher.date['rubricFilter'])
