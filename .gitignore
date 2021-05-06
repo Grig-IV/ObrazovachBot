@@ -1,5 +1,7 @@
 ObrazovachBotConfig.json
 LaunchSettings.json
+bot_database.json
+PlaceholderFile
 
 __pycache__/
 .vscode/
