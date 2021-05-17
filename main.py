@@ -3,6 +3,7 @@ from src.Services.telebot_provider import TelebotProvider
 
 
 obrz_bot = startup.build_obrz_bot()
+telebot = TelebotProvider.get_telebot()
 
 
 @telebot.message_handler(content_types=['text'])
@@ -35,7 +36,7 @@ def commands_handler(message):
         pass
 
 
-@obrz_bot.telebot.callback_query_handler(func=lambda call: True)
+@telebot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
     call = obrz_bot.middleware_handler(call)
 
@@ -46,13 +47,14 @@ def callback_handler(call):
     pikcher = call.pikcher
 
     if action == 'switch_page':
-        pass
-    elif action == 'switch_artcls_type':
-        pass
+        obrz_bot.article_modul.switch_page(pikcher, int(value))
+    elif action == 'switch_article_type':
+        obrz_bot.article_modul.switch_article_type(pikcher, value)
     elif action == 'refresh':
-        pass
+        obrz_bot.article_modul.update_article_db(pikcher, value)
 
-@obrz_bot.telebot.message_handler(content_types=['document'])
+
+@telebot.message_handler(content_types=['document'])
 def doc_for_init_handler(db_message):
     db_message = obrz_bot.middleware_handler(db_message)
 
