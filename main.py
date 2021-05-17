@@ -1,28 +1,14 @@
 import startup
-from src.Services.logger import Logger
+from src.Services.telebot_provider import TelebotProvider
 
 
 obrz_bot = startup.build_obrz_bot()
 
 
-@obrz_bot.telebot.middleware_handler(update_types=['message'])
-def middleware_handler(bot_instance, package):
-    if Logger.is_enabled:
-        Logger.send_log(package)
-
-    pikcher = obrz_bot.pikcher_storage.get_or_create_user(package)
-
-    is_bot_initialized = obrz_bot.initialization_handler(pikcher, package)
-
-    if is_bot_initialized and pikcher is not None:
-        package.access_token = True
-        package.pikcher = pikcher
-    else:
-        package.access_token = False
-
-
-@obrz_bot.telebot.message_handler(content_types=['text'])
+@telebot.message_handler(content_types=['text'])
 def commands_handler(message):
+    message = obrz_bot.middleware_handler(message)
+
     if not message.access_token:
         return
 
@@ -37,7 +23,7 @@ def commands_handler(message):
         obrz_bot.article_modul.take_article(pikcher, value)
     elif command == '/на_опрос':
         obrz_bot.article_modul.take_poll(pikcher, value)
-    elif command ==  '/не_беру':
+    elif command == '/не_беру':
         obrz_bot.article_modul.give_article_back(pikcher, value)
     elif command.startswith('/add_filter '):
         pass
@@ -51,10 +37,13 @@ def commands_handler(message):
 
 @obrz_bot.telebot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
+    call = obrz_bot.middleware_handler(call)
+
     if not call.access_token:
         return
-    
+
     action, value, _ = call.data.split()
+    pikcher = call.pikcher
 
     if action == 'switch_page':
         pass
@@ -65,9 +54,9 @@ def callback_handler(call):
 
 @obrz_bot.telebot.message_handler(content_types=['document'])
 def doc_for_init_handler(db_message):
-    print(db_message.access_token)
-    
+    db_message = obrz_bot.middleware_handler(db_message)
+
     pass
 
 
-obrz_bot.telebot.polling(none_stop=True)
+telebot.polling(none_stop=True)

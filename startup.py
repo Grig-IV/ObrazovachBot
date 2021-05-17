@@ -1,14 +1,10 @@
 import json
 
 from telebot import TeleBot
-from telebot import apihelper
 
 from src.Services.logger import Logger
 from src.obrazovach_bot import ObrazovachBot
 from src.Services.telebot_provider import TelebotProvider
-
-
-apihelper.ENABLE_MIDDLEWARE = True
 
 
 def build_obrz_bot():
