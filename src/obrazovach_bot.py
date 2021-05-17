@@ -9,10 +9,9 @@ from src.DatabaseManager.database_manager import DatabaseManager
 
 
 class ObrazovachBot:
-    def __init__(self, telebot, pikchers_names):
-        self._is_initialized = False
-
-        self.telebot = telebot
+    def __init__(self, pikcher_storage, db_manager):
+        self.pikcher_storage = pikcher_storage
+        self.db_manager = db_manager
 
         self.moduls = list()
         self.article_modul = ArticleModul(self, telebot)
