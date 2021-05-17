@@ -21,6 +21,22 @@ class ObrazovachBot:
         self.pikcher_storage = UserStorage(pikchers_names)
         self.db_manager = DatabaseManager(telebot)
 
+    def middleware_handler(self, package):
+        if Logger.is_enabled:
+            Logger.send_log(package)
+
+        pikcher = self.pikcher_storage.get_or_create_user(package)
+
+        is_bot_initialized = self.initialization_handler(pikcher, package)
+
+        if is_bot_initialized and pikcher is not None:
+            package.access_token = True
+            package.pikcher = pikcher
+        else:
+            package.access_token = False
+
+        return package
+
     def initialization_handler(self, pikcher, package):
         if self._is_initialized:
             return True
