@@ -1,8 +1,8 @@
 class User:
-    def __init__(self, username, user_id):
+    def __init__(self, user_storage, username, chat_id):
+        self._user_storage = user_storage
         self._username = username
-        self._id = user_id
-        self._date = dict()
+        self._chat_id = chat_id
 
     @property
     def username(self):
@@ -10,11 +10,11 @@ class User:
 
     @property
     def chat_id(self):
-        return self._id
+        return self._chat_id
 
     @property
     def data(self):
-        return self._date.copy()
+        return self._user_storage._data[self._username].copy()
 
     def set_data(self, data_key, data):
-        self._date[data_key] = data
+        self._user_storage._data[self._username][data_key] = data
