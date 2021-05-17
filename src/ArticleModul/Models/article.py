@@ -1,17 +1,20 @@
-from datetime import datetime 
+import datetime as dt
 
 
 class Article:
     """
     Class for contain an article data.
     """
+    STR_DATETIME_FORMAT = '%Y-%m-%d %H:%M'
+
     def __init__(self, link, rubrics, header, published_str,
-                 taken_by=None, is_for_poll=None):
+                 taken_by=None, is_for_poll=None, **kwargs):
         self._link = link
         self._type = link.split('/')[1]
         self._rubrics = set(rubrics)
         self._header = header
-        self._published = datetime.strptime(published_str, '%Y-%m-%d %H:%M')
+        dt_format = Article.STR_DATETIME_FORMAT
+        self._published = dt.datetime.strptime(published_str, dt_format)
 
         self._taken_by = taken_by
         self._is_for_poll = is_for_poll
@@ -61,12 +64,12 @@ class Article:
         self._is_for_poll = False
 
     def to_dict(self):
+        dt_format = Article.STR_DATETIME_FORMAT
         article_dict = {
             'link': self.link,
-            'type': self.type,
             'rubrics': list(self.rubrics),
             'header': self.header,
-            'published_str': self.published.strftime('%Y-%m-%d %H:%M'),
+            'published_str': self.published.strftime(dt_format),
             'taken_by': self.taken_by,
             'is_for_poll': self.is_for_poll
         }
