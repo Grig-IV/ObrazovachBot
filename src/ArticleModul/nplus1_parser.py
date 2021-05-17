@@ -2,8 +2,6 @@ import requests
 
 from bs4 import BeautifulSoup
 
-from src.ArticleModul.Models.article import Article
-
 
 class Parser_NP1:
     def get_links_on_main():
@@ -20,10 +18,10 @@ class Parser_NP1:
             lambda t: 'Партнерский материал' not in str(t),
             articles_tags_on_main)
         articles_links = map(lambda t: t.a['href'], articles_tags_on_main)
-    
+
         return articles_links
 
-    def parse_article(article_link):
+    async def parse_article(article_link):
         """
         Parse article date by link.
         """
@@ -58,4 +56,3 @@ class Parser_NP1:
         }
 
         return article_dict
-
