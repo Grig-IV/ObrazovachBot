@@ -51,7 +51,7 @@ def callback_handler(call):
     elif action == 'switch_article_type':
         obrz_bot.article_modul.switch_article_type(pikcher, value)
     elif action == 'refresh':
-        obrz_bot.article_modul.update_article_db(pikcher, value)
+        obrz_bot.article_modul.update_article_db()
 
 
 @telebot.message_handler(content_types=['document'])

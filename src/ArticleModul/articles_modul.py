@@ -10,16 +10,18 @@ class ArticleModul:
         self.obrz_bot = obrz_bot
         self.article_db = ArticleDataBase()
 
+    # region Database manipulation
     def get_db(self):
         return 'articleModul', self.article_db.get_db()
 
     def set_db(self, dict_db):
         self.article_db.set_db(dict_db['articleModul'])
+    # endregion
 
     # region Decorators
-    def update_article_db(func):
+    def update_article_db_triger(func):
         def func_with_updater(self, *args, **kwargs):
-            asyncio.run(self.article_db.update())
+            self.update_article_db()
             func(self, *args, **kwargs)
 
         return func_with_updater
@@ -41,7 +43,7 @@ class ArticleModul:
     # endregion
 
     @update_messages
-    @update_article_db
+    @update_article_db_triger
     def create_article_message(self, pikcher):
         a_mes = ArticleMessage(pikcher,
                                self.article_db.free_articles,
@@ -53,20 +55,21 @@ class ArticleModul:
 
     # Message commands
     @update_messages
-    @update_article_db
+    @update_article_db_triger
     def take_article(self, pikcher, article_url):
         article = self.article_db.find_article(article_url)
 
         article.taken_by = pikcher.username
 
     @update_messages
-    @update_article_db
+    @update_article_db_triger
     def take_poll(self, pikcher, article_url):
         article = self.article_db.find_article(article_url)
 
         article.use_for_poll()
 
     @update_messages
+    @update_article_db_triger
     def give_article_back(self, pikcher, article_url):
         article = self.article_db.find_article(article_url)
 
@@ -76,6 +79,9 @@ class ArticleModul:
             article.dont_use_for_poll()
 
     def update_article_message(self, pikcher):
+        if self.article_db.last_update is None:
+            self.update_article_db()
+
         a_mes = ArticleMessage(pikcher,
                                self.article_db.free_articles,
                                self.article_db.last_update)
@@ -85,12 +91,23 @@ class ArticleModul:
         telebot.edit_message_text(chat_id=pikcher.chat_id,
                                   message_id=a_message_id,
                                   **a_mes.get_kwargs())
+    # endregion
 
-    # Callback action
+    # region Callback action
     def switch_page(self, pikcher, numb_page):
+        if pikcher.data['currentPage'] == numb_page:
+            self.update_article_db()
+
         pikcher.set_data("currentPage", numb_page)
         self.update_article_message(pikcher)
 
     def switch_article_type(self, pikcher, article_type):
+        if pikcher.data['currArticleTypeShow'] == article_type:
+            self.update_article_db()
+
         pikcher.set_data("currArticleTypeShow", article_type)
         self.update_article_message(pikcher)
+
+    def update_article_db(self):
+        asyncio.run(self.article_db.update())
+    # endregion
