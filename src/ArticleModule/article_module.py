@@ -1,21 +1,21 @@
 import asyncio
 
-from src.ArticleModul.article_database import ArticleDataBase
+from src.ArticleModule.article_database import ArticleDataBase
 from src.Services.telebot_provider import TelebotProvider
-from src.ArticleModul.Messages.article_message import ArticleMessage
+from src.ArticleModule.Messages.article_message import ArticleMessage
 
 
-class ArticleModul:
+class ArticleModule:
     def __init__(self, obrz_bot):
         self.obrz_bot = obrz_bot
         self.article_db = ArticleDataBase()
 
     # region Database manipulation
     def get_db(self):
-        return 'articleModul', self.article_db.get_db()
+        return 'articleModule', self.article_db.get_db()
 
     def set_db(self, dict_db):
-        self.article_db.set_db(dict_db['articleModul'])
+        self.article_db.set_db(dict_db['articleModule'])
     # endregion
 
     # region Decorators
@@ -53,18 +53,25 @@ class ArticleModul:
         mes = telebot.send_message(pikcher.chat_id, **a_mes.get_kwargs())
         pikcher.set_data('articleMessageId', mes.message_id)
 
-    # Message commands
+        # Message commands
     @update_messages
     @update_article_db_triger
     def take_article(self, pikcher, article_url):
         article = self.article_db.find_article(article_url)
+        if article is None:
+            print("Article not found!")
+            return
 
         article.taken_by = pikcher.username
+        self.article_db.move_from_free_to_taken(article)
 
     @update_messages
     @update_article_db_triger
-    def take_poll(self, pikcher, article_url):
+    def take_poll(self, article_url):
         article = self.article_db.find_article(article_url)
+        if article is None:
+            print("Article not found!")
+            return
 
         article.use_for_poll()
 
@@ -72,9 +79,13 @@ class ArticleModul:
     @update_article_db_triger
     def give_article_back(self, pikcher, article_url):
         article = self.article_db.find_article(article_url)
+        if article is None:
+            print("Article not found!")
+            return
 
         if article.taken_by is not None:
             article.taken_by = None
+            self.article_db.move_from_taken_to_free(article)
         elif article.is_for_poll:
             article.dont_use_for_poll()
 
@@ -106,6 +117,7 @@ class ArticleModul:
             self.update_article_db()
 
         pikcher.set_data("currArticleTypeShow", article_type)
+        pikcher.set_data("currentPage", 0)
         self.update_article_message(pikcher)
 
     def update_article_db(self):

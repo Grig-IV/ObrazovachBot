@@ -19,13 +19,13 @@ def commands_handler(message):
     if command == '/start':
         obrz_bot.db_manager.create_db_message(pikcher)
         obrz_bot.save_db()
-        obrz_bot.article_modul.create_article_message(pikcher)
+        obrz_bot.article_module.create_article_message(pikcher)
     elif command in ['/беру', '/подумаю']:
-        obrz_bot.article_modul.take_article(pikcher, value)
+        obrz_bot.article_module.take_article(pikcher, value)
     elif command == '/на_опрос':
-        obrz_bot.article_modul.take_poll(pikcher, value)
+        obrz_bot.article_module.take_poll(pikcher, value)
     elif command == '/не_беру':
-        obrz_bot.article_modul.give_article_back(pikcher, value)
+        obrz_bot.article_module.give_article_back(pikcher, value)
     elif command.startswith('/add_filter '):
         pass
     elif command.startswith('/remove_filter '):
@@ -47,11 +47,11 @@ def callback_handler(call):
     pikcher = call.pikcher
 
     if action == 'switch_page':
-        obrz_bot.article_modul.switch_page(pikcher, int(value))
+        obrz_bot.article_module.switch_page(pikcher, int(value))
     elif action == 'switch_article_type':
-        obrz_bot.article_modul.switch_article_type(pikcher, value)
+        obrz_bot.article_module.switch_article_type(pikcher, value)
     elif action == 'refresh':
-        obrz_bot.article_modul.update_article_db()
+        obrz_bot.article_module.update_article_db()
 
 
 @telebot.message_handler(content_types=['document'])

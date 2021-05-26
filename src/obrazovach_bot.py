@@ -1,6 +1,6 @@
 from telebot import types
 
-from src.ArticleModul.articles_modul import ArticleModul
+from src.ArticleModule.article_module import ArticleModule
 from src.Services.logger import Logger
 # from src.Services.telebot_provider import TelebotProvider
 
@@ -10,9 +10,9 @@ class ObrazovachBot:
         self.pikcher_storage = pikcher_storage
         self.db_manager = db_manager
 
-        self.moduls = list()
-        self.article_modul = ArticleModul(self)
-        self.moduls.append(self.article_modul)
+        self.modules = list()
+        self.article_module = ArticleModule(self)
+        self.modules.append(self.article_module)
 
         self._is_initialized = False
 
@@ -21,15 +21,17 @@ class ObrazovachBot:
             Logger.send_log(package)
 
         pikcher = self.pikcher_storage.get_or_create_user(package)
+        if pikcher is None:
+            package.access_token = False
+            return package
 
         is_bot_initialized = self.initialization_handler(pikcher, package)
-
-        if is_bot_initialized and pikcher is not None:
-            package.access_token = True
-            package.pikcher = pikcher
-        else:
+        if not is_bot_initialized:
             package.access_token = False
+            return package
 
+        package.access_token = True
+        package.pikcher = pikcher
         return package
 
     def initialization_handler(self, pikcher, package):
@@ -52,16 +54,16 @@ class ObrazovachBot:
         db_dict = self.db_manager.load_db(chat_id, db_message_id)
 
         self.pikcher_storage.set_users_db(db_dict)
-        for modul in self.moduls:
-            modul.set_db(db_dict)
+        for module in self.modules:
+            module.set_db(db_dict)
 
     def save_db(self):
         db_dict = dict()
 
         db_name, db = self.pikcher_storage.get_users_db()
         db_dict[db_name] = db
-        for modul in self.moduls:
-            db_name, db = modul.get_db()
+        for module in self.modules:
+            db_name, db = module.get_db()
             db_dict[db_name] = db
 
         pikchers = self.pikcher_storage.get_users()

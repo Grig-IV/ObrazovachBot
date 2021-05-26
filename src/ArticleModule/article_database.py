@@ -1,15 +1,15 @@
 import asyncio
 import datetime as dt
 
-from src.ArticleModul.nplus1_parser import Parser_NP1
-from src.ArticleModul.Models.article import Article
+from src.ArticleModule.nplus1_parser import Parser_NP1
+from src.ArticleModule.Models.article import Article
 
 
 class ArticleDataBase:
     def __init__(self):
         self._last_update = None
-        self._free_articles = list()
-        self._taken_articles = list()
+        self._free_articles = set()
+        self._taken_articles = set()
 
     @property
     def last_update(self):
@@ -25,7 +25,7 @@ class ArticleDataBase:
 
     @property
     def all_articles(self):
-        return self.free_articles + self.taken_articles
+        return set.union(self.free_articles, self.taken_articles)
 
     def get_db(self):
         free_articles = list(map(lambda a: a.to_dict(), self.free_articles))
@@ -36,8 +36,8 @@ class ArticleDataBase:
     def set_db(self, db):
         free_articles = map(lambda d: Article(**d), db['freeArticles'])
         taken_articles = map(lambda d: Article(**d), db['takenArticles'])
-        self._free_articles = list(free_articles)
-        self._taken_articles = list(taken_articles)
+        self._free_articles = set(free_articles)
+        self._taken_articles = set(taken_articles)
 
     def find_article(self, article_url):
         finding_g = (a for a in self.all_articles if a.url == article_url)
@@ -60,4 +60,18 @@ class ArticleDataBase:
 
         for a_dict in article_dicts:
             article = Article(**a_dict)
-            self._free_articles.append(article)
+            self._free_articles.add(article)
+
+    def move_from_free_to_taken(self, article):
+        if article in self._free_articles:
+            return
+
+        self._free_articles.remove(article)
+        self._taken_articles.add(article)
+
+    def move_from_taken_to_free(self, article):
+        if article in self._taken_articles:
+            return
+
+        self._taken_articles.remove(article)
+        self._free_articles.add(article)
