@@ -23,9 +23,9 @@ def commands_handler(message):
     elif command in ['/беру', '/подумаю']:
         obrz_bot.article_module.take_article(pikcher, value)
     elif command == '/на_опрос':
-        obrz_bot.article_module.take_poll(pikcher, value)
+        obrz_bot.article_module.take_poll(value)
     elif command == '/не_беру':
-        obrz_bot.article_module.give_article_back(pikcher, value)
+        obrz_bot.article_module.give_article_back(value)
     elif command.startswith('/add_filter '):
         pass
     elif command.startswith('/remove_filter '):
