@@ -4,11 +4,13 @@ from bs4 import BeautifulSoup
 
 
 class Parser_NP1:
+    MAIN_URL = "https://nplus1.ru"
+
     def get_links_on_main():
         """
         Return all links on main page (without partner materials).
         """
-        main_page = requests.get("https://nplus1.ru")
+        main_page = requests.get(Parser_NP1.MAIN_URL)
         main_html = BeautifulSoup(main_page.text, 'html.parser')
 
         # Articles parsing
@@ -50,7 +52,7 @@ class Parser_NP1:
 
         article_dict = {
             'link': article_link,
-            'rubrics': rubrics_list,
+            'rubrics': set(rubrics_list),
             'header': article_header,
             'published_str': published_dt_str
         }
