@@ -101,3 +101,21 @@ class ArticleModule:
     def update_article_db(self):
         asyncio.run(self.article_db.update())
     # endregion
+
+    def _start_refreshing_animation(self):
+        pikchers_f = lambda p: p.data.get('articleMessageId') is not None
+        pikchers = self.obrz_bot.pikcher_storage.get_users(pikchers_f)
+        for pikcher in pikchers:
+            a_mes = ArticleMessage(pikcher,
+                                   self.article_db.free_articles,
+                                   self.article_db.last_update)
+
+            refreshing_replay_markup = a_mes.reply_markup
+            refreshing_replay_markup.keyboard[2][0].text = "Обновляю..."
+
+            message_id = pikcher.data['articleMessageId']
+            self.telebot.edit_message_reply_markup(
+                chat_id=pikcher.chat_id,
+                message_id=message_id,
+                reply_markup=refreshing_replay_markup
+            )
