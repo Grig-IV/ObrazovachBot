@@ -48,6 +48,9 @@ class ArticleModule:
         if article is None:
             print("Article not found!")
             return
+        elif article.taken_by:
+            print("Article was taken!")
+            return
 
         article.taken_by = pikcher.username
         self.article_db.move_from_free_to_taken(article)
@@ -57,6 +60,9 @@ class ArticleModule:
         article = self.article_db.find_article(article_url)
         if article is None:
             print("Article not found!")
+            return
+        elif article.taken_by:
+            print("Article was taken!")
             return
 
         article.use_for_poll()
