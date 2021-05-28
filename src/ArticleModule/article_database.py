@@ -39,9 +39,6 @@ class ArticleDataBase:
         self._free_articles = set(free_articles)
         self._taken_articles = set(taken_articles)
 
-    def find_article(self, article_url):
-        finding_g = (a for a in self.all_articles if a.url == article_url)
-        return next(finding_g, None)
 
     async def update(self):
         MSK_TZ = dt.timezone(dt.timedelta(hours=3))
@@ -66,6 +63,10 @@ class ArticleDataBase:
         for a_dict in article_dicts:
             article = Article(**a_dict)
             self._free_articles.add(article)
+
+    def find_article(self, article_url):
+        finding_g = (a for a in self.all_articles if a.url == article_url)
+        return next(finding_g, None)
 
     def move_from_free_to_taken(self, article):
         if article in self._taken_articles:
