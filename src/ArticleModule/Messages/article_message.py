@@ -20,28 +20,31 @@ class ArticleMessage(Message):
             rubric_filter = set()
 
         type_filter = lambda a: a.type == curr_a_type
-        articles = list(filter(type_filter, free_articles))
-        pagination_data = self._get_pagination_data(pikcher, len(articles))
+        articles_of_type = list(filter(type_filter, free_articles))
+
+        articles_count = len(articles_of_type)
+        pagination_data = self._get_pagination_data(pikcher, articles_count)
+        reply_markup = ArticleMessage.create_reply_markup(curr_a_type,
+                                                          pagination_data,
+                                                          db_message_id)
+
         curr_page, _ = pagination_data
-        articles_on_page = self._get_articles_to_show(articles,
+        articles_on_page = self._get_articles_to_show(articles_of_type,
                                                       rubric_filter,
                                                       curr_page)
 
         text = self._get_message_text(articles_on_page,
                                       pikcher_tz,
                                       last_update)
-        reply_markup = self._get_keyboard(curr_a_type,
-                                          pagination_data,
-                                          db_message_id)
 
         super().__init__(text, reply_markup=reply_markup)
 
-    def _get_pagination_data(self, pikcher, numb_articles):
-        if numb_articles == 0:
+    def _get_pagination_data(self, pikcher, articles_count):
+        if articles_count == 0:
             total_pages = 1
         else:
             max_articals_on_page = ArticleMessage.MAX_ARTICLES_ON_PAGE
-            total_pages = math.ceil(numb_articles / max_articals_on_page)
+            total_pages = math.ceil(articles_count / max_articals_on_page)
 
         curr_page = pikcher.data['currentPage']
         if curr_page >= total_pages:
@@ -63,7 +66,10 @@ class ArticleMessage(Message):
     def _get_message_text(self, articels_list, time_zone, last_update):
         heading_line = "<b>Список свободных статей:</b>\n\n"
 
-        tz_last_update = last_update.replace(tzinfo=time_zone)
+        if last_update is not None:
+            tz_last_update = last_update.replace(tzinfo=time_zone)
+        else:
+            tz_last_update = dt.datetime.now(tz=time_zone)
         srt_last_update = tz_last_update.strftime("%H:%M")
         date_line = "<i>Последний раз обновлено в " + srt_last_update + "</i>"
 
@@ -96,17 +102,15 @@ class ArticleMessage(Message):
 
         return published
 
-    def _get_keyboard(self, curr_a_type, pagination_data, db_message_id):
-        a_t_line = self._get_article_type_line(curr_a_type, db_message_id)
-        p_n_line = self._get_pagination_line(pagination_data, db_message_id)
-        r_line = self._get_refresh_line(db_message_id)
+    def create_reply_markup(curr_a_type, pagination_data, db_message_id):
+        button_lines = [
+            ArticleMessage._get_article_type_line(curr_a_type, db_message_id),
+            ArticleMessage._get_pagination_line(pagination_data, db_message_id),
+            ArticleMessage._get_refresh_line(db_message_id)
+        ]
+        return InlineKeyboardMarkup(button_lines)
 
-        button_lines = [a_t_line, p_n_line, r_line]
-        keyboard = InlineKeyboardMarkup(button_lines)
-
-        return keyboard
-
-    def _get_article_type_line(self, curr_a_type, db_message_id):
+    def _get_article_type_line(curr_a_type, db_message_id):
         callback_data_temp = "switch_article_type {0} " + db_message_id
 
         text = "Новости" if curr_a_type != 'news' else "· Новости ·"
@@ -125,7 +129,7 @@ class ArticleMessage(Message):
 
         return articles_type_line
 
-    def _get_pagination_line(self, pagination_data, db_message_id):
+    def _get_pagination_line(pagination_data, db_message_id):
         curr_page, total_pages = pagination_data
         callback_data_temp = 'switch_page {0} ' + db_message_id
         switch_buttons = list()
@@ -138,7 +142,7 @@ class ArticleMessage(Message):
 
         return switch_buttons
 
-    def _get_refresh_line(self, db_message_id):
+    def _get_refresh_line(db_message_id):
         text = "Обновить"
         callback_data = 'refresh None ' + db_message_id
         refresh_btn = InlineKeyboardButton(text, callback_data=callback_data)
