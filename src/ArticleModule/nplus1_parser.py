@@ -1,5 +1,7 @@
 import requests
 
+import aiohttp
+
 from bs4 import BeautifulSoup
 
 
@@ -21,16 +23,21 @@ class Parser_NP1:
             articles_tags_on_main)
         articles_links = map(lambda t: t.a['href'], articles_tags_on_main)
 
-        return articles_links
+        return set(articles_links)
 
-    async def parse_article(article_link):
+    async def load_page(link):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(Parser_NP1.MAIN_URL + link) as response:
+                return await response.text()
+
+    def parse_page(article_page):
         """
         Parse article date by link.
         """
-        article_page = requests.get("https://nplus1.ru" + article_link)
-        if article_page.status_code != 200:
-            return None
-        article_html = BeautifulSoup(article_page.text, 'html.parser')
+        article_html = BeautifulSoup(article_page, 'html.parser')
+
+        link_tag = article_html.select_one('meta[property="og:url"]')
+        article_link = link_tag['content'].replace(Parser_NP1.MAIN_URL, "")
 
         rubrics_tags_table = article_html.select("p.table a[data-rubric]")
         if rubrics_tags_table:

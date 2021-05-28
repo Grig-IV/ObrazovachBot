@@ -50,14 +50,19 @@ class ArticleDataBase:
         links_on_main = Parser_NP1.get_links_on_main()
         db_links = map(lambda a: a.link, self.all_articles)
         new_links = list(filter(lambda l: l not in db_links, links_on_main))
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
         tasks = list()
         for link in new_links:
             task = asyncio.create_task(Parser_NP1.parse_article(link))
+            task = loop.create_task(Parser_NP1.load_page(link))
             tasks.append(task)
+        load_pages = loop.run_until_complete(asyncio.gather(*tasks))
 
         article_dicts = await asyncio.gather(*tasks)
 
+        article_dicts = map(lambda p: Parser_NP1.parse_page(p), load_pages)
         for a_dict in article_dicts:
             article = Article(**a_dict)
             self._free_articles.add(article)
