@@ -7,6 +7,7 @@ class ArticleModule:
     def __init__(self, obrz_bot):
         self.obrz_bot = obrz_bot
         self.article_db = ArticleDataBase()
+        self.telebot = TelebotProvider.get_telebot()
 
     def get_db(self):
         return 'articleModule', self.article_db.get_db()
@@ -76,11 +77,10 @@ class ArticleModule:
                                self.article_db.free_articles,
                                self.article_db.last_update)
 
-        telebot = TelebotProvider.get_telebot()
         a_message_id = pikcher.data['articleMessageId']
-        telebot.edit_message_text(chat_id=pikcher.chat_id,
-                                  message_id=a_message_id,
-                                  **a_mes.get_kwargs())
+        self.telebot.edit_message_text(chat_id=pikcher.chat_id,
+                                       message_id=a_message_id,
+                                       **a_mes.get_kwargs())
 
     # Callback action
     def switch_page(self, pikcher, numb_page):
