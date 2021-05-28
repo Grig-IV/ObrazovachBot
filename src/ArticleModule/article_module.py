@@ -19,31 +19,19 @@ class ArticleModule:
     # endregion
 
     # region Decorators
-    def update_article_db_triger(func):
+    def multiple_update(func):
         def func_with_updater(self, *args, **kwargs):
-            self.update_article_db()
+            self._start_refreshing_animation()
+            self.article_db.update()  # update article db
             func(self, *args, **kwargs)
+            self.obrz_bot.save_db()  # update db message for everyone
+            self.update_article_messages()  # update article message for everyone
 
         return func_with_updater
 
-    def update_messages(func):
-        def func_with_updater(self, *args, **kwargs):
-            func(self, *args, **kwargs)
 
-            # update db messages
-            self.obrz_bot.save_db()
-
-            # update article messages
-            pikchers_f = lambda p: p.data['articleMessageId'] is not None
-            pikchers = self.obrz_bot.pikcher_storage.get_users(pikchers_f)
-            for pikcher in pikchers:
-                self.update_article_message(pikcher)
-
-        return func_with_updater
     # endregion
-
-    @update_messages
-    @update_article_db_triger
+    @multiple_update
     def create_article_message(self, pikcher):
         a_mes = ArticleMessage(pikcher,
                                self.article_db.free_articles,
@@ -54,8 +42,8 @@ class ArticleModule:
         pikcher.set_data('articleMessageId', mes.message_id)
 
         # Message commands
-    @update_messages
-    @update_article_db_triger
+    # Message commands
+    @multiple_update
     def take_article(self, pikcher, article_url):
         article = self.article_db.find_article(article_url)
         if article is None:
@@ -65,8 +53,7 @@ class ArticleModule:
         article.taken_by = pikcher.username
         self.article_db.move_from_free_to_taken(article)
 
-    @update_messages
-    @update_article_db_triger
+    @multiple_update
     def take_poll(self, article_url):
         article = self.article_db.find_article(article_url)
         if article is None:
@@ -75,8 +62,6 @@ class ArticleModule:
 
         article.use_for_poll()
 
-    @update_messages
-    @update_article_db_triger
     def give_article_back(self, pikcher, article_url):
         article = self.article_db.find_article(article_url)
         if article is None:
