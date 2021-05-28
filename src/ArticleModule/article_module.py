@@ -1,5 +1,3 @@
-import asyncio
-
 from src.ArticleModule.article_database import ArticleDataBase
 from src.Services.telebot_provider import TelebotProvider
 from src.ArticleModule.Messages.article_message import ArticleMessage
@@ -10,15 +8,12 @@ class ArticleModule:
         self.obrz_bot = obrz_bot
         self.article_db = ArticleDataBase()
 
-    # region Database manipulation
     def get_db(self):
         return 'articleModule', self.article_db.get_db()
 
     def set_db(self, dict_db):
         self.article_db.set_db(dict_db['articleModule'])
-    # endregion
 
-    # region Decorators
     def multiple_update(func):
         def func_with_updater(self, *args, **kwargs):
             self._start_refreshing_animation()
@@ -30,7 +25,6 @@ class ArticleModule:
         return func_with_updater
 
 
-    # endregion
     @multiple_update
     def create_article_message(self, pikcher):
         a_mes = ArticleMessage(pikcher,
@@ -41,7 +35,6 @@ class ArticleModule:
         mes = telebot.send_message(pikcher.chat_id, **a_mes.get_kwargs())
         pikcher.set_data('articleMessageId', mes.message_id)
 
-        # Message commands
     # Message commands
     @multiple_update
     def take_article(self, pikcher, article_url):
@@ -63,6 +56,7 @@ class ArticleModule:
         article.use_for_poll()
 
     def give_article_back(self, pikcher, article_url):
+    @multiple_update
         article = self.article_db.find_article(article_url)
         if article is None:
             print("Article not found!")
@@ -87,9 +81,8 @@ class ArticleModule:
         telebot.edit_message_text(chat_id=pikcher.chat_id,
                                   message_id=a_message_id,
                                   **a_mes.get_kwargs())
-    # endregion
 
-    # region Callback action
+    # Callback action
     def switch_page(self, pikcher, numb_page):
         if pikcher.data['currentPage'] == numb_page:
             self.update_article_db()
