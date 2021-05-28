@@ -99,8 +99,11 @@ class ArticleModule:
         self.update_article_message(pikcher)
 
     def update_article_db(self):
-        asyncio.run(self.article_db.update())
-    # endregion
+        self._start_refreshing_animation()
+        is_new_articles_in_db = self.article_db.update()
+        if is_new_articles_in_db:
+            self.obrz_bot.save_db()
+        self.update_article_messages()
 
     def _start_refreshing_animation(self):
         pikchers_f = lambda p: p.data.get('articleMessageId') is not None
