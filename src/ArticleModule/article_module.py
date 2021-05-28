@@ -67,14 +67,14 @@ class ArticleModule:
 
         article.use_for_poll()
 
-    def give_article_back(self, pikcher, article_url):
     @multiple_update
+    def give_article_back(self, article_url):
         article = self.article_db.find_article(article_url)
         if article is None:
             print("Article not found!")
             return
 
-        if article.taken_by is not None:
+        if article.taken_by:
             article.taken_by = None
             self.article_db.move_from_taken_to_free(article)
         elif article.is_for_poll:
