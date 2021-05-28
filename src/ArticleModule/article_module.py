@@ -25,6 +25,11 @@ class ArticleModule:
 
         return func_with_updater
 
+    def update_article_messages(self):
+        pikchers_f = lambda p: p.data.get('articleMessageId') is not None
+        pikchers = self.obrz_bot.pikcher_storage.get_users(pikchers_f)
+        for pikcher in pikchers:
+            self.update_article_message(pikcher)
 
     @multiple_update
     def create_article_message(self, pikcher):
