@@ -68,14 +68,16 @@ class ArticleDataBase:
             self._free_articles.add(article)
 
     def move_from_free_to_taken(self, article):
-        if article in self._free_articles:
+        if article in self._taken_articles:
+            print("Article alredy taken!")
             return
 
         self._free_articles.remove(article)
         self._taken_articles.add(article)
 
     def move_from_taken_to_free(self, article):
-        if article in self._taken_articles:
+        if article in self._free_articles:
+            print("Article alredy free!")
             return
 
         self._taken_articles.remove(article)
