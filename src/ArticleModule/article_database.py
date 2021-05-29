@@ -6,10 +6,15 @@ from src.ArticleModule.Models.article import Article
 
 
 class ArticleDataBase:
+    FREE_ARTICLES_CAPACITY = 48
+    TAKEN_ARTICLES_CAPACITY = 36
+
     def __init__(self):
         self._last_update = None
-        self._free_articles = set()
-        self._taken_articles = set()
+
+        # _free_articles: key=rubric, value=articl_list_of_rubric
+        self._free_articles = dict()
+        self._taken_articles = list()
 
     @property
     def last_update(self):
@@ -17,11 +22,14 @@ class ArticleDataBase:
 
     @property
     def free_articles(self):
-        return self._free_articles.copy()
+        free_articles_set = set()
+        for articl_list in self._free_articles.values():
+            free_articles_set.update(articl_list)
+        return free_articles_set
 
     @property
     def taken_articles(self):
-        return self._taken_articles.copy()
+        return set(self._taken_articles)
 
     @property
     def all_articles(self):
@@ -37,7 +45,7 @@ class ArticleDataBase:
         free_articles = map(lambda d: Article(**d), db['freeArticles'])
         taken_articles = map(lambda d: Article(**d), db['takenArticles'])
         self._free_articles = set(free_articles)
-        self._taken_articles = set(taken_articles)
+        self._taken_articles = list(taken_articles)
 
     def update(self):
         MSK_TZ = dt.timezone(dt.timedelta(hours=3))
@@ -59,8 +67,8 @@ class ArticleDataBase:
         article_dicts = map(lambda p: Parser_NP1.parse_page(p), load_pages)
         for a_dict in article_dicts:
             article = Article(**a_dict)
-            self._free_articles.add(article)
-        
+            self._add_free_article(article)
+
         return bool(new_links)
 
     def find_article(self, article_url):
@@ -72,8 +80,13 @@ class ArticleDataBase:
             print("Article alredy taken!")
             return
 
-        self._free_articles.remove(article)
-        self._taken_articles.add(article)
+        self._remove_free_article(article)
+        self._taken_articles.insert(0, article)
+
+        # remove extra article
+        capacity = ArticleDataBase.TAKEN_ARTICLES_CAPACITY
+        while len(self._taken_articles) > capacity:
+            self._taken_articles.pop()
 
     def move_from_taken_to_free(self, article):
         if article in self._free_articles:
@@ -81,4 +94,23 @@ class ArticleDataBase:
             return
 
         self._taken_articles.remove(article)
-        self._free_articles.add(article)
+        self._add_free_article(article)
+
+    def _add_free_article(self, article):
+        for r in article.rubrics:
+            if r not in self._free_articles:
+                self._free_articles[r] = list()
+
+            self._free_articles[r].insert(0, article)
+
+            # remove extra article
+            capacity = ArticleDataBase.FREE_ARTICLES_CAPACITY
+            while len(self._taken_articles) > capacity:
+                self._taken_articles.pop()
+
+    def _remove_free_article(self, article):
+        for r in article.rubrics:
+            if article not in self._free_articles[r]:
+                continue
+
+            self._free_articles[r].remove(article)
