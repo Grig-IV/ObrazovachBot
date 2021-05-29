@@ -4,10 +4,10 @@ class Logger:
 
     @property
     def is_enabled():
-        return Logger._tb is not None
+        return _tb != None
 
     def enable(telebot):
-        Logger._tb = telebot
+        LoggerBot._tb = telebot
 
     def send_log(package):
         pass

@@ -18,13 +18,10 @@ class ArticleModule:
     def multiple_update(func):
         def func_with_updater(self, *args, **kwargs):
             self._start_refreshing_animation()
-            # update article db
-            self.article_db.update()
+            self.article_db.update()  # update article db
             func(self, *args, **kwargs)
-            # update db message for everyone
-            self.obrz_bot.save_db()
-            # update article message for everyone
-            self.update_article_messages()
+            self.obrz_bot.save_db()  # update db message for everyone
+            self.update_article_messages()  # update article message for everyone
 
         return func_with_updater
 
