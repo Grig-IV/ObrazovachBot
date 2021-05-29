@@ -2,7 +2,8 @@ from telebot import types
 
 from src.ArticleModule.article_module import ArticleModule
 from src.Services.logger import Logger
-# from src.Services.telebot_provider import TelebotProvider
+from src.Messages.init_message import InitMessage
+from src.Services.telebot_provider import TelebotProvider
 
 
 class ObrazovachBot:
@@ -46,7 +47,8 @@ class ObrazovachBot:
             if package.text == '/skip_init':
                 self._is_initialized = True
             else:
-                pass
+                telebot = TelebotProvider.get_telebot()
+                telebot.reply_to(package, InitMessage().get_kwargs())
 
         return self._is_initialized
 
