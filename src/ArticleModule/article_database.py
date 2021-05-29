@@ -42,10 +42,12 @@ class ArticleDataBase:
         return db
 
     def set_db(self, db):
-        free_articles = map(lambda d: Article(**d), db['freeArticles'])
         taken_articles = map(lambda d: Article(**d), db['takenArticles'])
-        self._free_articles = set(free_articles)
         self._taken_articles = list(taken_articles)
+
+        free_articles = map(lambda d: Article(**d), db['freeArticles'])
+        for a in free_articles:
+            self._add_free_article(a)
 
     def update(self):
         MSK_TZ = dt.timezone(dt.timedelta(hours=3))
@@ -63,6 +65,8 @@ class ArticleDataBase:
             task = loop.create_task(Parser_NP1.load_page(link))
             tasks.append(task)
         load_pages = loop.run_until_complete(asyncio.gather(*tasks))
+
+        loop.close()
 
         article_dicts = map(lambda p: Parser_NP1.parse_page(p), load_pages)
         for a_dict in article_dicts:
