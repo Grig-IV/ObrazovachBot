@@ -48,7 +48,7 @@ class ObrazovachBot:
                 self._is_initialized = True
             else:
                 telebot = TelebotProvider.get_telebot()
-                telebot.reply_to(package, InitMessage().get_kwargs())
+                telebot.reply_to(package, **InitMessage().get_kwargs())
 
         return self._is_initialized
 

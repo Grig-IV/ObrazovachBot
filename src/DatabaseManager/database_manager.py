@@ -30,13 +30,14 @@ class DatabaseManager:
         with open('bot_database.json', 'w', encoding='utf-8') as db_file:
             json.dump(db_dict, db_file)
         with open('bot_database.json', 'rb') as db_file:
+            db_doc = InputMediaDocument(db_file)
             for user in users:
                 db_message_id = user.data.get('databaseMessageId')
                 if db_message_id is None:
                     continue
 
                 self._tb.edit_message_media(
-                    media=InputMediaDocument(db_file),
+                    media=db_doc,
                     chat_id=user.chat_id,
                     message_id=db_message_id)
 
