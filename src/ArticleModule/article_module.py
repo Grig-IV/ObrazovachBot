@@ -7,7 +7,7 @@ class ArticleModule:
     def __init__(self, obrz_bot):
         self.obrz_bot = obrz_bot
         self.article_db = ArticleDataBase()
-        self.telebot = TelebotProvider.get_telebot()
+        self._tb = TelebotProvider.get_telebot()
 
     def get_db(self):
         return 'articleModule', self.article_db.get_db()
@@ -40,8 +40,7 @@ class ArticleModule:
                                self.article_db.free_articles,
                                self.article_db.last_update)
 
-        telebot = TelebotProvider.get_telebot()
-        mes = telebot.send_message(pikcher.chat_id, **a_mes.get_kwargs())
+        mes = self._tb.send_message(pikcher.chat_id, **a_mes.get_kwargs())
         pikcher.set_data('articleMessageId', mes.message_id)
 
     # Message commands
@@ -92,9 +91,9 @@ class ArticleModule:
                                self.article_db.last_update)
 
         a_message_id = pikcher.data['articleMessageId']
-        self.telebot.edit_message_text(chat_id=pikcher.chat_id,
-                                       message_id=a_message_id,
-                                       **a_mes.get_kwargs())
+        self._tb.edit_message_text(chat_id=pikcher.chat_id,
+                                   message_id=a_message_id,
+                                   **a_mes.get_kwargs())
 
     # Callback action
     def switch_page(self, pikcher, numb_page):
@@ -131,7 +130,7 @@ class ArticleModule:
             refreshing_replay_markup.keyboard[2][0].text = "Обновляю..."
 
             message_id = pikcher.data['articleMessageId']
-            self.telebot.edit_message_reply_markup(
+            self._tb.edit_message_reply_markup(
                 chat_id=pikcher.chat_id,
                 message_id=message_id,
                 reply_markup=refreshing_replay_markup
